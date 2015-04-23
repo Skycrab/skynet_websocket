@@ -128,14 +128,15 @@ end
 
 
 function ws:send_frame(fin, opcode, data)
+    local finbit, mask_bit
     if fin then
         finbit = 0x80
     else
         finbit = 0
     end
 
-    frame = string.pack("B", finbit | opcode)
-    l = #data
+    local frame = string.pack("B", finbit | opcode)
+    local l = #data
 
     if self.mask_outgoing then
         mask_bit = 0x80
@@ -220,7 +221,7 @@ function ws:recv()
 end
 
 local function websocket_mask(mask, data, length)
-    umasked = {}
+    local umasked = {}
     for i=1, length do
         umasked[i] = string.char(string.byte(data, i) ~ string.byte(mask, (i-1)%4 + 1))
     end
