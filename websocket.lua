@@ -115,6 +115,8 @@ function ws.new(id, header, handler, conf)
     local self = {
         id = id,
         handler = handler,
+        client_terminated = false,
+        server_terminated = false,
         mask_outgoing = conf.mask_outgoing,
         check_origin = conf.check_origin
     }
@@ -178,17 +180,25 @@ end
 
 function ws:close(code, reason)
     -- 1000  "normal closure" status code
-    if code == nil and reason ~= nil then
-        code = 1000
+    if not self.server_terminated then
+        if code == nil and reason ~= nil then
+            code = 1000
+        end
+        local data = ""
+        if code ~= nil then
+            data = string.pack(">H", code)
+        end
+        if reason ~= nil then
+            data = data .. reason
+        end
+        self:send_frame(true, 0x8, data)
+
+        self.server_terminated = true
     end
-    local data = ""
-    if code ~= nil then
-        data = string.pack(">H", code)
+
+    if self.client_terminated then
+        socket.close(self.id)
     end
-    if reason ~= nil then
-        data = data .. reason
-    end
-    self:send_frame(true, 0x8, data)
 end
 
 function ws:recv()
@@ -307,8 +317,8 @@ function ws:recv_frame()
             if #frame_data > 2 then
                 reason = frame_data:sub(3)
             end
+            self.client_terminated = true
             self:close()
-            socket.close(self.id)
             self.handler.on_close(self, code, reason)
         elseif frame_opcode == 0x9 then --Ping
             self:send_pong()

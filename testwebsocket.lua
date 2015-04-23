@@ -15,10 +15,11 @@ end
 function handler.on_message(ws, message)
     print(string.format("%d receive:%s", ws.id, message))
     ws:send_text(message .. "from server")
+    ws:close()
 end
 
 function handler.on_close(ws, code, reason)
-    print(string.format("%d close:%d  %s", ws.id, code, reason))
+    print(string.format("%d close:%s  %s", ws.id, code, reason))
 end
 
 local function handle_socket(id)
