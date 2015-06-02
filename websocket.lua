@@ -24,12 +24,17 @@ end
 
 
 local function challenge_response(key, protocol)
+    protocol = protocol or ""
+    if protocol ~= "" then
+        protocol = protocol .. "\r\n"
+    end
+
     local accept = crypt.base64encode(crypt.sha1(key .. "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"))
     return string.format("HTTP/1.1 101 Switching Protocols\r\n" ..
                         "Upgrade: websocket\r\n" ..
                         "Connection: Upgrade\r\n" ..
                         "Sec-WebSocket-Accept: %s\r\n" ..
-                        "%s\r\n", accept, protocol or "")
+                        "%s\r\n", accept, protocol)
     
 end
 
