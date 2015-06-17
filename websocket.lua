@@ -152,9 +152,9 @@ function ws:send_frame(fin, opcode, data)
     if l < 126 then
         frame = frame .. string.pack("B", l | mask_bit)
     elseif l < 0xFFFF then
-        frame = frame .. string.pack("!BH", 126 | mask_bit, l)
+        frame = frame .. string.pack(">BH", 126 | mask_bit, l)
     else 
-        frame = frame .. string.pack("!BL", 127 | mask_bit, l)
+        frame = frame .. string.pack(">BL", 127 | mask_bit, l)
     end
 
     if self.mask_outgoing then
@@ -273,14 +273,14 @@ function ws:recv_frame()
         if not h_data then
             return false, nil, "Payloadlen 126 read true length error:" .. err
         end
-        frame_length = string.pack("!H", h_data)
+        frame_length = string.unpack(">H", h_data)
 
     else --payloadlen == 127
         local l_data, err = read(self.id, 8)
         if not l_data then
             return false, nil, "Payloadlen 127 read true length error:" .. err
         end
-        frame_length = string.pack("!L", l_data)
+        frame_length = string.unpack(">L", l_data)
     end
 
 
