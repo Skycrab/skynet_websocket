@@ -215,7 +215,9 @@ function ws:recv()
             return success, message
         end
         if final then
-            data = data .. message
+            if "string" == type(message) then
+                data = data .. message
+            end
             break
         else
             data = data .. message
