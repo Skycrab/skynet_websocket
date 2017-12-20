@@ -1,6 +1,5 @@
 local skynet = require "skynet"
-local socket = require "socket"
-local string = require "string"
+local socket = require "skynet.socket"
 local websocket = require "websocket"
 local httpd = require "http.httpd"
 local urllib = require "http.url"
@@ -27,7 +26,7 @@ local function handle_socket(id)
     local code, url, method, header, body = httpd.read_request(sockethelper.readfunc(id), 8192)
     if code then
         
-        if url == "/ws" then
+        if header.upgrade == "websocket" then
             local ws = websocket.new(id, header, handler)
             ws:start()
         end
