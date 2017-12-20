@@ -26,7 +26,7 @@ local function handle_socket(id)
     local code, url, method, header, body = httpd.read_request(sockethelper.readfunc(id), 8192)
     if code then
         
-        if url == "/ws" then
+        if header.upgrade == "websocket" then
             local ws = websocket.new(id, header, handler)
             ws:start()
         end
