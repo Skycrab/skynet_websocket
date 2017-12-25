@@ -341,7 +341,13 @@ function ws:start()
         local message, err = self:recv()
         if not message then
             --print('recv eror:', message, err)
-            socket.close(self.id)
+            if socket.invalid(self.id) then
+                socket.close(self.id)
+                self.handler.on_close(self)
+            elseif "string" == type(err) and err:find("first 2 byte error") then
+                socket.close(self.id)
+                self.handler.on_close(self)
+            end
         end
     end
 end
